@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Card — Just a Love Note</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="announce">✿ Handmade in Orange, California &nbsp;•&nbsp; Free shipping on orders over $25 &nbsp;•&nbsp; Custom orders always welcome ✿</div>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="index.html"><span class="mark">💌</span>
+      <span><span class="name">Just a Love Note</span><span class="sub">Handmade Paper-Cut Cards</span></span></a>
+    <nav class="links">
+      <a href="shop.html">Shop All</a>
+      <a href="index.html#cats">Categories</a>
+      <a href="index.html#story">Our Story</a>
+      <a href="contact.html">Custom Orders</a>
+      <a href="index.html#reviews">Reviews</a>
+    </nav>
+    <div class="tools">
+      <button class="icon-btn" data-open-cart>🛒 Cart <span class="cart-count">0</span></button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="pdp"><!-- filled by JS --></main>
+
+<!-- related -->
+<section class="section" style="background:var(--paper);border-top:1px solid var(--line)">
+  <div class="wrap">
+    <div class="sec-head"><span class="script">you might also love</span><h2>More Handmade Cards</h2></div>
+    <div class="prod-grid" id="related"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="name">Just a Love Note</div>
+        <p>Unique paper-cut cards, handmade with love in Orange, California. Spreading love one card at a time.</p>
+        <div class="socials">
+          <a href="https://www.instagram.com/justalovenote_/" title="Instagram">📷</a>
+          <a href="https://m.facebook.com/Just-a-Love-Note-103590081759204/" title="Facebook">👍</a>
+          <a href="https://www.etsy.com/shop/JustALoveNote" title="Etsy">🛍️</a>
+        </div>
+      </div>
+      <div><h4>Shop</h4><ul>
+        <li><a href="shop.html">All Cards</a></li>
+        <li><a href="shop.html?cat=birthday">Birthday</a></li>
+        <li><a href="shop.html?cat=love">Love &amp; Sympathy</a></li>
+        <li><a href="shop.html?cat=thankyou">Thank You</a></li>
+      </ul></div>
+      <div><h4>Help</h4><ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="contact.html">Custom Orders</a></li>
+        <li><a href="contact.html">Wholesale</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul></div>
+      <div><h4>About</h4><ul>
+        <li><a href="index.html#story">Our Story</a></li>
+        <li><a href="index.html#reviews">Reviews</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul></div>
+    </div>
+    <div class="foot-bottom"><span>© 2026 Just a Love Note · Made with 💌 in California</span><span>Privacy · Terms</span></div>
+  </div>
+</footer>
+
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+<script>
+  let qty = 1;
+  const id = new URLSearchParams(location.search).get("id");
+  const p = PRODUCTS.find(x => x.id === id);
+  const cat = p && CATEGORIES.find(c => c.id === p.category);
+
+  if (!p){
+    document.getElementById("pdp").innerHTML =
+      `<div style="padding:90px 0;text-align:center"><h1>Card not found</h1>
+      <p style="color:var(--ink-soft);margin:12px 0 24px">We couldn't find that card.</p>
+      <a href="shop.html" class="btn btn-primary">Browse all cards →</a></div>`;
+  } else {
+    document.title = p.name + " — Just a Love Note";
+    const art = p.image ? `<img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;border-radius:20px">` : p.emoji;
+    document.getElementById("pdp").innerHTML = `
+      <div class="pdp">
+        <div class="gallery" style="background:${p.bg}">${art}</div>
+        <div>
+          <div class="crumbs"><a href="shop.html">Shop</a> › <a href="shop.html?cat=${p.category}">${cat?cat.label:''}</a> › ${p.name}</div>
+          <h1>${p.name}</h1>
+          <div class="stars">★★★★★ <span style="color:var(--ink-soft);font-size:.9rem">${p.rating.toFixed(1)} (${p.reviews} reviews)</span></div>
+          <div class="price">$${(p.priceCents/100).toFixed(2)}</div>
+          <p class="desc">${p.desc}</p>
+          <div class="qty">
+            <button onclick="bump(-1)" aria-label="decrease">−</button>
+            <span id="qtyVal" style="font-weight:700;font-size:1.1rem">1</span>
+            <button onclick="bump(1)" aria-label="increase">+</button>
+          </div>
+          <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="addToCart('${p.id}', qty)">Add to Cart →</button>
+          ${isDigital(p) ? `
+          <ul class="features">
+            <li>⬇️ Instant download — delivered after checkout</li>
+            <li>🖨️ Print at home, as many as you like</li>
+            <li>📄 High-resolution file, ready in minutes</li>
+            <li>🚫 No shipping — nothing is mailed</li>
+          </ul>` : `
+          <ul class="features">
+            <li>✂️ Hand-cut &amp; assembled in Orange, California</li>
+            <li>💌 Blank inside for your own message</li>
+            <li>✉️ Ships flat with a coordinating envelope</li>
+            <li>📦 Free shipping on orders over $25</li>
+          </ul>`}
+        </div>
+      </div>`;
+  }
+
+  function bump(d){ qty = Math.max(1, qty + d); document.getElementById("qtyVal").textContent = qty; }
+
+  // related: same category, else random others
+  if (p){
+    let rel = PRODUCTS.filter(x => x.category === p.category && x.id !== p.id);
+    if (rel.length < 4) rel = rel.concat(PRODUCTS.filter(x => x.id !== p.id && !rel.includes(x)));
+    document.getElementById("related").innerHTML = rel.slice(0,4).map(x => {
+      const a = x.image ? `<img src="${x.image}" alt="${x.name}" style="width:100%;height:100%;object-fit:cover">` : x.emoji;
+      return `<div class="card">
+        <a class="thumb" href="product.html?id=${x.id}" style="background:${x.bg}">${x.tag?`<span class="tag">${x.tag}</span>`:""}${a}</a>
+        <div class="body"><h3><a href="product.html?id=${x.id}">${x.name}</a></h3>
+        <div class="stars">★★★★★ <small>(${x.reviews})</small></div>
+        <div class="foot"><span class="price">$${(x.priceCents/100).toFixed(2)}</span>
+        <button class="add" onclick="addToCart('${x.id}')">Add to Cart</button></div></div></div>`;
+    }).join("");
+  }
+</script>
+</body>
+</html>

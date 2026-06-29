@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thank You! — Just a Love Note</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500&family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<div style="min-height:100vh;display:grid;place-items:center;text-align:center;padding:40px;background:radial-gradient(circle at 50% 0%, rgba(232,168,124,.18), transparent 55%),var(--paper)">
+  <div style="max-width:32em">
+    <div style="font-size:4rem">💌</div>
+    <span class="script" style="font-size:1.8rem;color:var(--rose-deep)">thank you so much</span>
+    <h1 style="font-size:2.6rem;margin:6px 0 14px">Your order is on its way to being made!</h1>
+    <p style="color:var(--ink-soft);margin-bottom:24px">A confirmation is headed to your inbox. Every card is hand-cut and assembled with love in Orange, California — thank you for supporting handmade. 🌸</p>
+
+    <!-- Digital downloads appear here if the order included any -->
+    <div id="downloads" style="display:none;text-align:left;background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;margin:0 auto 26px;box-shadow:var(--shadow)">
+      <h3 style="font-size:1.2rem;margin-bottom:6px">⬇️ Your downloads are ready</h3>
+      <p style="color:var(--ink-soft);font-size:.88rem;margin-bottom:14px">Click to save your printable files. We've also kept this list — check your email receipt for your records.</p>
+      <div id="downloadList"></div>
+    </div>
+    <p id="dlLoading" style="display:none;color:var(--ink-soft);margin-bottom:22px">Preparing your downloads… ⏳</p>
+
+    <a href="index.html" class="btn btn-primary">Back to home</a>
+    <a href="shop.html" class="btn btn-ghost" style="margin-left:8px">Keep shopping</a>
+  </div>
+</div>
+
+<script>
+  // Empty the cart after a successful checkout.
+  try { localStorage.removeItem("jaln_cart"); } catch(e){}
+
+  // If we have a Stripe session id, ask the server for any digital downloads.
+  const sid = new URLSearchParams(location.search).get("session_id");
+  if (sid) {
+    const loading = document.getElementById("dlLoading");
+    loading.style.display = "block";
+    fetch("/.netlify/functions/get-downloads?session_id=" + encodeURIComponent(sid))
+      .then(r => r.json())
+      .then(data => {
+        loading.style.display = "none";
+        if (data.downloads && data.downloads.length) {
+          document.getElementById("downloadList").innerHTML = data.downloads.map(d =>
+            `<a href="${d.url}" download class="btn btn-primary" style="display:flex;justify-content:space-between;width:100%;margin-bottom:10px;text-decoration:none">
+               <span>${d.name}</span><span>Download →</span></a>`).join("");
+          document.getElementById("downloads").style.display = "block";
+        }
+      })
+      .catch(() => { loading.style.display = "none"; });
+  }
+</script>
+</body>
+</html>

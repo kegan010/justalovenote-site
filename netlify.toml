@@ -1,0 +1,10 @@
+# Netlify configuration for Just a Love Note
+[build]
+  publish = "site"                 # the folder that gets served as the website
+  functions = "netlify/functions"  # serverless functions live here
+
+# Friendly URL: /api/checkout -> the checkout function (optional convenience)
+[[redirects]]
+  from = "/api/checkout"
+  to = "/.netlify/functions/create-checkout"
+  status = 200

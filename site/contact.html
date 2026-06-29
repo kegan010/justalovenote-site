@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact & Custom Orders — Just a Love Note</title>
+<meta name="description" content="Get in touch with Just a Love Note for questions, wholesale, or a one-of-a-kind custom card.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<style>
+  .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:50px;padding:60px 0}
+  .contact-form label{display:block;font-weight:700;font-size:.85rem;margin:16px 0 6px;color:var(--ink)}
+  .contact-form input,.contact-form select,.contact-form textarea{
+    width:100%;border:1.5px solid var(--line);border-radius:12px;padding:12px 14px;
+    font-family:inherit;font-size:.95rem;background:#fff;color:var(--ink)}
+  .contact-form input:focus,.contact-form select:focus,.contact-form textarea:focus{outline:none;border-color:var(--rose)}
+  .contact-form textarea{min-height:140px;resize:vertical}
+  .contact-form .btn{margin-top:22px;width:100%;justify-content:center}
+  .hp{position:absolute;left:-9999px}
+  .info-card{background:var(--blush);border-radius:20px;padding:34px;border:1px solid var(--line)}
+  .info-card h3{font-size:1.4rem;margin-bottom:8px}
+  .info-card p{color:var(--ink-soft);margin-bottom:18px}
+  .info-row{display:flex;gap:12px;align-items:flex-start;margin-bottom:16px}
+  .info-row .ic{font-size:1.4rem}
+  .info-row b{display:block}
+  .info-row span{color:var(--ink-soft);font-size:.9rem}
+  @media(max-width:900px){.contact-grid{grid-template-columns:1fr;gap:30px}}
+</style>
+</head>
+<body>
+
+<div class="announce">✿ Handmade in Orange, California &nbsp;•&nbsp; Free shipping on orders over $25 &nbsp;•&nbsp; Custom orders always welcome ✿</div>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="index.html"><span class="mark">💌</span>
+      <span><span class="name">Just a Love Note</span><span class="sub">Handmade Paper-Cut Cards</span></span></a>
+    <nav class="links">
+      <a href="shop.html">Shop All</a>
+      <a href="index.html#cats">Categories</a>
+      <a href="index.html#story">Our Story</a>
+      <a href="contact.html" class="active">Custom Orders</a>
+      <a href="index.html#reviews">Reviews</a>
+    </nav>
+    <div class="tools">
+      <button class="icon-btn" data-open-cart>🛒 Cart <span class="cart-count">0</span></button>
+    </div>
+  </div>
+</header>
+
+<div class="page-head">
+  <span class="script">i'd love to hear from you</span>
+  <h1>Contact &amp; Custom Orders</h1>
+  <p>Questions, wholesale, or a one-of-a-kind card — tell me about it.</p>
+</div>
+
+<section class="section" style="padding-top:0">
+  <div class="wrap contact-grid">
+
+    <div class="contact-form">
+      <!-- Netlify Forms handles submissions automatically once deployed -->
+      <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/contact-thanks.html">
+        <input type="hidden" name="form-name" value="contact">
+        <p class="hp"><label>Don't fill this out: <input name="bot-field"></label></p>
+
+        <label for="name">Your name</label>
+        <input id="name" type="text" name="name" required>
+
+        <label for="email">Email</label>
+        <input id="email" type="email" name="email" required>
+
+        <label for="topic">What's this about?</label>
+        <select id="topic" name="topic">
+          <option>Custom card request</option>
+          <option>General question</option>
+          <option>Wholesale / bulk order</option>
+          <option>Order help</option>
+        </select>
+
+        <label for="message">Tell me more</label>
+        <textarea id="message" name="message" placeholder="The occasion, names, an inside joke, a date, how many you need… the more detail the better!" required></textarea>
+
+        <button class="btn btn-primary" type="submit">Send your note →</button>
+      </form>
+    </div>
+
+    <div>
+      <div class="info-card">
+        <h3>Let's make something special 🌸</h3>
+        <p>Every custom card starts with a quick note. Share the occasion and any details, and I'll follow up with ideas, pricing, and a timeline.</p>
+        <div class="info-row"><span class="ic">✏️</span><div><b>Custom cards</b><span>Inside jokes, hobbies, names, dates — made just for your moment.</span></div></div>
+        <div class="info-row"><span class="ic">📦</span><div><b>Wholesale &amp; bulk</b><span>Stocking a shop or need cards for an event? Ask about bulk pricing.</span></div></div>
+        <div class="info-row"><span class="ic">⏱️</span><div><b>Response time</b><span>I usually reply within 1–2 days.</span></div></div>
+        <div class="info-row"><span class="ic">📷</span><div><b>Follow along</b><span><a href="https://www.instagram.com/justalovenote_/" style="color:var(--rose-deep);font-weight:700">@justalovenote_</a> on Instagram for new designs.</span></div></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="name">Just a Love Note</div>
+        <p>Unique paper-cut cards, handmade with love in Orange, California. Spreading love one card at a time.</p>
+        <div class="socials">
+          <a href="https://www.instagram.com/justalovenote_/" title="Instagram">📷</a>
+          <a href="https://m.facebook.com/Just-a-Love-Note-103590081759204/" title="Facebook">👍</a>
+          <a href="https://www.etsy.com/shop/JustALoveNote" title="Etsy">🛍️</a>
+        </div>
+      </div>
+      <div><h4>Shop</h4><ul>
+        <li><a href="shop.html">All Cards</a></li>
+        <li><a href="shop.html?cat=birthday">Birthday</a></li>
+        <li><a href="shop.html?cat=love">Love &amp; Sympathy</a></li>
+        <li><a href="shop.html?cat=digital">Digital Downloads</a></li>
+      </ul></div>
+      <div><h4>Help</h4><ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="contact.html">Custom Orders</a></li>
+        <li><a href="contact.html">Wholesale</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul></div>
+      <div><h4>About</h4><ul>
+        <li><a href="index.html#story">Our Story</a></li>
+        <li><a href="index.html#reviews">Reviews</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul></div>
+    </div>
+    <div class="foot-bottom"><span>© 2026 Just a Love Note · Made with 💌 in California</span><span>Privacy · Terms</span></div>
+  </div>
+</footer>
+
+<script src="js/products.js"></script>
+<script src="js/cart.js"></script>
+</body>
+</html>

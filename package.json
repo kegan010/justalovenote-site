@@ -1,0 +1,13 @@
+{
+  "name": "justalovenote-site",
+  "version": "1.0.0",
+  "description": "Custom storefront for Just a Love Note — handmade paper-cut cards.",
+  "private": true,
+  "scripts": {
+    "dev": "netlify dev",
+    "deploy": "netlify deploy --prod"
+  },
+  "dependencies": {
+    "stripe": "^16.0.0"
+  }
+}
