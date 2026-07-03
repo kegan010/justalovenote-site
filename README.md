@@ -27,7 +27,8 @@ justalovenote-site/
 │     └─ cart.js             ← cart + checkout logic
 ├─ netlify/functions/
 │  ├─ create-checkout.js     ← the secure Stripe checkout (server-side prices)
-│  └─ get-downloads.js       ← delivers digital downloads after payment
+│  ├─ get-downloads.js       ← delivers digital downloads after payment
+│  └─ stripe-webhook.js      ← emails you an order summary when a sale completes
 ├─ netlify.toml              ← hosting config
 └─ package.json              ← lists the Stripe dependency
 ```
@@ -144,6 +145,49 @@ page shows them a **Download** button after payment is confirmed. To finish:
    automatically.
 
 To add a new printable later, see the instructions in `site/downloads/README.txt`.
+
+## Order-received emails — setup (one-time)
+
+You'll get a nicely formatted email (items + shipping address) for every order.
+It uses **Resend** to send the email and a **Stripe webhook** to trigger it.
+
+**A. Get a Resend key (free)**
+1. Sign up at **resend.com**.
+2. Go to **API Keys → Create API Key**, copy it (starts with `re_`).
+3. (Optional but nicer) Under **Domains**, add `justalovenote.com` and add the
+   DNS records it gives you in Netlify DNS — then you can send from
+   `orders@justalovenote.com`. If you skip this, the email just comes from
+   Resend's default address, which is fine for alerts to yourself.
+
+**B. Add these Netlify environment variables**
+   (Site configuration → Environment variables)
+   - `RESEND_API_KEY`   = your `re_…` key
+   - `ORDER_EMAIL_TO`   = the inbox where you want order alerts (e.g. your Gmail)
+   - `ORDER_EMAIL_FROM` = *(optional)* `Just a Love Note <orders@justalovenote.com>`
+     once your domain is verified; otherwise leave it unset.
+
+**C. Create the Stripe webhook**
+1. In Stripe: **Developers → Webhooks → Add endpoint**.
+2. Endpoint URL: `https://justalovenote.com/.netlify/functions/stripe-webhook`
+3. Under "Select events," choose **`checkout.session.completed`**. Create it.
+4. Copy the endpoint's **Signing secret** (`whsec_…`) and add it in Netlify as
+   `STRIPE_WEBHOOK_SECRET`.
+5. Redeploy.
+
+**D. Test it:** place a test order — an order email should hit your inbox within
+a few seconds.
+
+> Note: Stripe webhooks are per-mode. Set the webhook up in **test** mode to test
+> (its signing secret differs), then create a **live**-mode webhook the same way
+> before you go live, and update `STRIPE_WEBHOOK_SECRET` to the live one.
+
+**Customer confirmation email.** The same webhook also sends the *buyer* a branded
+"thank you for your order" email. This only sends once you've **verified
+justalovenote.com in Resend** and set `ORDER_EMAIL_FROM` — because Resend (like
+all email services) won't let you email customers from its shared default
+address. Your own order alerts work right away regardless; the customer email
+simply switches on after domain verification. So: to get *both* emails, do the
+optional domain step (A3) and set `ORDER_EMAIL_FROM`.
 
 ## Contact / custom-order form — already wired up ✅
 
