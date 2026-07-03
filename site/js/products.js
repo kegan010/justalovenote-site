@@ -108,9 +108,18 @@ const PRODUCTS = [
   { id:"candy-corn-svg", name:"Candy Corn Halloween Card SVG — Cricut", priceCents:349, category:"digital", type:"digital", file:"downloads/candy-corn-card-svg.zip", emoji:"🍬", bg:"#f3e2d6", tag:"SVG", rating:5.0, reviews:5, desc:"A candy-corn Halloween card SVG template for Cricut and other cutting machines." }
 ];
 
-/* helper: returns photo <img> or emoji art for a product */
-function productArt(p, sizeClass) {
-  if (p.image) return `<img src="${p.image}" alt="${p.name}" class="${sizeClass||''}">`;
-  return p.emoji;
+/* ------------------------------------------------------------
+   Photo with automatic emoji fallback.
+   Each product looks for a photo at  img/<id>.jpg  (or a custom
+   path set in the product's `image` field). If that file isn't
+   there yet, the emoji shows instead — so you can add photos one
+   at a time just by dropping correctly-named files into site/img/.
+   See site/img/README.txt for the exact filename for each card.
+   ------------------------------------------------------------ */
+function coverArt(p) {
+  const src = p.image || `img/${p.id}.jpg`;
+  const name = (p.name || "").replace(/"/g, "&quot;");
+  return `<span class="art-emoji">${p.emoji}</span>` +
+         `<img class="art-photo" src="${src}" alt="${name}" loading="lazy" onerror="this.remove()">`;
 }
 function isDigital(p){ return p && p.type === "digital"; }

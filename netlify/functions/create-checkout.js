@@ -120,12 +120,17 @@ exports.handler = async (event) => {
       subtotal += product.priceCents * qty;
       if (product.digital) { if (!digitalIds.includes(it.id)) digitalIds.push(it.id); }
       else hasPhysical = true;
+      // Tax classification for Stripe Tax:
+      //  physical cards -> General / Tangible Goods
+      //  digital printables & SVG cut files -> Digital images (downloaded, permanent)
+      const taxCode = product.digital ? "txcd_10501000" : "txcd_99999999";
       line_items.push({
         quantity: qty,
         price_data: {
           currency: "usd",
           unit_amount: product.priceCents,
-          product_data: { name: product.name }
+          tax_behavior: "exclusive", // sales tax is added on top of the listed price
+          product_data: { name: product.name, tax_code: taxCode }
         }
       });
     }
@@ -138,6 +143,10 @@ exports.handler = async (event) => {
       mode: "payment",
       line_items,
       metadata: { digital_ids: digitalIds.join(",") },
+      // Stripe Tax calculates the correct sales tax from the buyer's address.
+      // NOTE: this requires Stripe Tax to be turned on in your Stripe dashboard
+      // (Settings → Tax) with your origin address + California registration added.
+      automatic_tax: { enabled: true },
       success_url: `${siteUrl}/success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/cancel.html`
     };
@@ -151,12 +160,17 @@ exports.handler = async (event) => {
           type: "fixed_amount",
           fixed_amount: { amount: shipCents, currency: "usd" },
           display_name: shipCents === 0 ? "Free shipping" : "Standard shipping",
+          tax_behavior: "exclusive",
           delivery_estimate: {
             minimum: { unit: "business_day", value: 3 },
             maximum: { unit: "business_day", value: 7 }
           }
         }
       }];
+    } else {
+      // Digital-only orders have no shipping address, so collect a billing
+      // address instead — Stripe Tax needs an address to calculate tax.
+      session.billing_address_collection = "required";
     }
 
     const created = await stripe.checkout.sessions.create(session);

@@ -16,6 +16,8 @@ justalovenote-site/
 │  ├─ product.html           ← single-card page
 │  ├─ contact.html           ← contact + custom-order form
 │  ├─ contact-thanks.html    ← shown after the form is sent
+│  ├─ faq.html               ← FAQ, shipping & policies page
+│  ├─ img/                   ← product photos go here (see its README.txt)
 │  ├─ success.html           ← shown after a successful purchase (+ digital downloads)
 │  ├─ cancel.html            ← shown if checkout is abandoned
 │  ├─ css/styles.css         ← all the styling
@@ -106,10 +108,15 @@ the `CATALOG` list. The website shows prices from `products.js`, but the server
 only charges what's in `create-checkout.js`, so buyers can never change a price.
 Keep the two lists matching.
 
-### Real photos instead of emoji
-1. Make a folder `site/img/` and drop in your photos.
-2. In a product, add `image: "img/your-photo.jpg"` (the page uses the photo
-   automatically when it's there). Square images (1000×1000px) look best.
+### Real photos instead of emoji (drop-in — no code editing)
+Every card automatically looks for a photo at `site/img/<id>.jpg`. If the file
+is there, the photo shows; if not, the emoji shows. So you can add photos one at
+a time, in any order:
+1. Save/export your card photo (square, ~1000×1000px works best).
+2. Rename it to the card's id, e.g. `getwell-dachshund.jpg`.
+3. Drop it in **`site/img/`** and upload to GitHub — it appears on the site.
+
+The full list of exact filenames for every card is in `site/img/README.txt`.
 
 ---
 
@@ -150,8 +157,30 @@ inbox. No code or third-party account needed.
 - **Order emails to you:** Stripe can email you on every sale
   (Dashboard → Settings → Notifications). For branded customer emails, look at
   Stripe's receipts settings.
-- **Sales tax:** Stripe Tax can auto-calculate it — enable in the dashboard and
-  add `automatic_tax: { enabled: true }` to the session in `create-checkout.js`.
+## Sales tax — code is ready, needs 3 clicks in Stripe ✅
+
+Your checkout already asks Stripe to calculate sales tax automatically. To switch
+it on (and it won't actually charge tax until you do):
+
+1. Get a **California seller's permit** — it's free at the CDTFA website
+   (cdtfa.ca.gov). You collect CA sales tax on orders shipped to California; you
+   generally don't owe tax in other states until you're doing $100k+/yr into that
+   state, so a small shop realistically only deals with California.
+2. In Stripe, go to **Settings → Tax**, turn on **Stripe Tax**, and set your
+   **origin address** (your business address).
+3. Add your **registration** for California (Settings → Tax → Registrations).
+
+That's it — tax then appears as its own line at checkout, calculated from the
+buyer's address. Digital downloads are handled too: the checkout code tags each
+item with a Stripe tax code (physical cards = `txcd_99999999` General/Tangible
+Goods, digital = `txcd_10501000` downloaded digital images), so Stripe applies
+each state's rule correctly with no dashboard changes. Stripe charges a small fee
+per taxed transaction. *(This isn't tax advice — confirm specifics with CDTFA or
+an accountant.)*
+
+> Heads up: until you complete steps 1–3, leave real (live) checkout off, or
+> Stripe will simply calculate $0 tax. It won't break anything, but you want tax
+> turned on before you start taking real California orders.
 - **Stronger download protection:** the printable links are public file paths
   (fine for low-cost items). For pricier digital goods, ask about expiring,
   single-use download links.

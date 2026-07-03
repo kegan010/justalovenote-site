@@ -68,7 +68,7 @@ function renderCart(){
   wrap.innerHTML = ids.map(id => {
     const p = byId(id); if (!p) return "";
     const q = cart[id];
-    const art = p.image ? `<img src="${p.image}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:10px">` : p.emoji;
+    const art = coverArt(p);
     return `<div class="citem">
       <div class="ci-art" style="background:${p.bg}">${art}</div>
       <div class="ci-info">
