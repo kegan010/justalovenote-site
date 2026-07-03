@@ -24,6 +24,7 @@
       <a href="index.html#story">Our Story</a>
       <a href="contact.html">Custom Orders</a>
       <a href="index.html#reviews">Reviews</a>
+      <a href="faq.html">FAQ</a>
     </nav>
     <div class="tools">
       <button class="icon-btn" data-open-cart>🛒 Cart <span class="cart-count">0</span></button>
@@ -72,10 +73,10 @@
       <div><h4>About</h4><ul>
         <li><a href="index.html#story">Our Story</a></li>
         <li><a href="index.html#reviews">Reviews</a></li>
-        <li><a href="#">FAQ</a></li>
+        <li><a href="faq.html">FAQ</a></li>
       </ul></div>
     </div>
-    <div class="foot-bottom"><span>© 2026 Just a Love Note · Made with 💌 in California</span><span>Privacy · Terms</span></div>
+    <div class="foot-bottom"><span>© 2026 Just a Love Note · Made with 💌 in California</span><span><a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a></span></div>
   </div>
 </footer>
 
@@ -86,7 +87,7 @@
   let activeCat = params.get("cat") || "all";
 
   function cardHTML(p){
-    const art = p.image ? `<img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover">` : p.emoji;
+    const art = coverArt(p);
     return `<div class="card">
       <a class="thumb" href="product.html?id=${p.id}" style="background:${p.bg}">
         ${p.tag ? `<span class="tag">${p.tag}</span>` : ""}${art}</a>
