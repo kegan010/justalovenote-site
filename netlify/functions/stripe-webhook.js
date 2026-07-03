@@ -126,7 +126,12 @@ exports.handler = async (event) => {
       </div>`;
 
     // 5) Send via Resend (plain HTTPS call — no extra package needed).
-    if (!process.env.RESEND_API_KEY || !process.env.ORDER_EMAIL_TO) {
+    // ORDER_EMAIL_TO may list several inboxes separated by commas, e.g.
+    //   "you@gmail.com, partner@gmail.com"  — all of them get the order alert.
+    const orderEmailsTo = (process.env.ORDER_EMAIL_TO || "")
+      .split(",").map(s => s.trim()).filter(Boolean);
+
+    if (!process.env.RESEND_API_KEY || orderEmailsTo.length === 0) {
       console.error("Missing RESEND_API_KEY or ORDER_EMAIL_TO — cannot send order email.");
       return { statusCode: 200, body: "order ok, email not configured" };
     }
@@ -140,22 +145,22 @@ exports.handler = async (event) => {
         },
         body: JSON.stringify({
           from: process.env.ORDER_EMAIL_FROM || "Just a Love Note <onboarding@resend.dev>",
-          to: [to],
+          to: Array.isArray(to) ? to : [to],
           reply_to: replyTo || undefined,
           subject: mailSubject,
           html: mailHtml
         })
       });
 
-    // 5a) Your own "new order" alert.
-    const ownerResp = await sendEmail(process.env.ORDER_EMAIL_TO, subject, html, cust.email);
+    // 5a) Your own "new order" alert (goes to every address in ORDER_EMAIL_TO).
+    const ownerResp = await sendEmail(orderEmailsTo, subject, html, cust.email);
     if (!ownerResp.ok) console.error("Owner email failed:", ownerResp.status, await ownerResp.text());
 
     // 5b) Customer confirmation — only if we have a verified sending domain
     //     (ORDER_EMAIL_FROM). Resend's default address can't email customers,
     //     so this is skipped until you verify justalovenote.com in Resend.
     if (process.env.ORDER_EMAIL_FROM && cust.email) {
-      const custResp = await sendEmail(cust.email, "Your Just a Love Note order 💌", customerHtml, process.env.ORDER_EMAIL_TO);
+      const custResp = await sendEmail(cust.email, "Your Just a Love Note order 💌", customerHtml, orderEmailsTo[0]);
       if (!custResp.ok) console.error("Customer email failed:", custResp.status, await custResp.text());
     }
 

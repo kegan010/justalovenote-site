@@ -162,7 +162,9 @@ It uses **Resend** to send the email and a **Stripe webhook** to trigger it.
 **B. Add these Netlify environment variables**
    (Site configuration → Environment variables)
    - `RESEND_API_KEY`   = your `re_…` key
-   - `ORDER_EMAIL_TO`   = the inbox where you want order alerts (e.g. your Gmail)
+   - `ORDER_EMAIL_TO`   = the inbox where you want order alerts (e.g. your Gmail).
+     To send alerts to **more than one** inbox, separate them with commas:
+     `you@gmail.com, partner@gmail.com`
    - `ORDER_EMAIL_FROM` = *(optional)* `Just a Love Note <orders@justalovenote.com>`
      once your domain is verified; otherwise leave it unset.
 
