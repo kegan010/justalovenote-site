@@ -159,16 +159,20 @@ inbox. No code or third-party account needed.
   Stripe's receipts settings.
 ## Sales tax — code is ready, needs 3 clicks in Stripe ✅
 
-Your checkout already asks Stripe to calculate sales tax automatically. To switch
-it on (and it won't actually charge tax until you do):
+Your checkout can calculate sales tax automatically, but it's **off by default**
+so you can test freely. Turn it on only after the steps below — otherwise Stripe
+has nothing configured and checkout will error.
 
 1. Get a **California seller's permit** — it's free at the CDTFA website
    (cdtfa.ca.gov). You collect CA sales tax on orders shipped to California; you
    generally don't owe tax in other states until you're doing $100k+/yr into that
    state, so a small shop realistically only deals with California.
-2. In Stripe, go to **Settings → Tax**, turn on **Stripe Tax**, and set your
-   **origin address** (your business address).
+2. In Stripe (on your **live** account), go to **Settings → Tax**, turn on
+   **Stripe Tax**, and set your **origin address** (your business address).
 3. Add your **registration** for California (Settings → Tax → Registrations).
+4. In **Netlify → Environment variables**, add `STRIPE_TAX_ENABLED` = `true`,
+   then redeploy. This is the switch that actually turns tax on at checkout.
+   (Leave this variable unset — or delete it — to test checkout without tax.)
 
 That's it — tax then appears as its own line at checkout, calculated from the
 buyer's address. Digital downloads are handled too: the checkout code tags each

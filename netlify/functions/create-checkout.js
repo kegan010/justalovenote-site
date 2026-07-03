@@ -143,10 +143,12 @@ exports.handler = async (event) => {
       mode: "payment",
       line_items,
       metadata: { digital_ids: digitalIds.join(",") },
-      // Stripe Tax calculates the correct sales tax from the buyer's address.
-      // NOTE: this requires Stripe Tax to be turned on in your Stripe dashboard
-      // (Settings → Tax) with your origin address + California registration added.
-      automatic_tax: { enabled: true },
+      // Stripe Tax calculates sales tax from the buyer's address — but ONLY when
+      // you switch it on with the STRIPE_TAX_ENABLED=true environment variable in
+      // Netlify. Leave it off (unset) while testing so checkout works before Tax
+      // is fully configured. Turn it on once you're on your LIVE key with your
+      // California registration active in the Stripe dashboard.
+      automatic_tax: { enabled: process.env.STRIPE_TAX_ENABLED === "true" },
       success_url: `${siteUrl}/success.html?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${siteUrl}/cancel.html`
     };
