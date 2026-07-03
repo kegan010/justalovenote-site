@@ -32,7 +32,7 @@ const PRODUCTS = [
   { id:"monkey-bananas", name:"Funny Monkey Birthday — Go Bananas", priceCents:600, category:"birthday", emoji:"🐵", bg:"#efe7d6", tag:"New", rating:5.0, reviews:9, desc:"A cheeky monkey card to tell someone to go bananas on their big day. Blank inside." },
   { id:"cat-birthday", name:"Funny Cat Birthday — Kraft Silhouette", priceCents:600, category:"birthday", emoji:"🐱", bg:"#eee2cf", tag:"", rating:5.0, reviews:31, desc:"A black-cat silhouette on warm kraft cardstock. Understated, funny, purr-fect for cat people." },
   { id:"candles-birthday", name:"Hand-Drawn Birthday Candles Card", priceCents:600, category:"birthday", emoji:"🕯️", bg:"#f5e6df", tag:"", rating:5.0, reviews:7, desc:"Colorful hand-drawn candles for a cheerful happy-birthday message." },
-  { id:"flowerpot-birthday", name:"Hand-Drawn Flower Pot — Happy Birthday", priceCents:600, category:"birthday", emoji:"🪴", bg:"#eef0e6", tag:"", rating:5.0, reviews:6, desc:"A charming hand-drawn flower pot birthday card for any plant or flower lover." },
+  { id:"flowerpot-birthday", name:"Hand-Drawn Flower Pot — Happy Birthday", priceCents:600, category:"birthday", emoji:"🌷", bg:"#eef0e6", tag:"", rating:5.0, reviews:6, desc:"A charming hand-drawn flower pot birthday card for any plant or flower lover." },
   { id:"teacup-birthday", name:"Tea Cup Birthday Card — Floral Blooms", priceCents:800, category:"birthday", emoji:"🍵", bg:"#f0e4dc", tag:"", rating:5.0, reviews:8, desc:"A delicate teacup overflowing with floral blooms. Sweet for the tea lover's birthday." },
   { id:"dog-birthday", name:"Funny Dog Birthday — Pawfect Day", priceCents:600, category:"birthday", emoji:"🐶", bg:"#f3e2d6", tag:"", rating:5.0, reviews:12, desc:"Wish them a pawfect day with this dog-lover birthday card." },
   { id:"pawty-birthday", name:"Pawty Time Birthday Card", priceCents:600, category:"birthday", emoji:"🐾", bg:"#f5e6df", tag:"", rating:5.0, reviews:5, desc:"A hand-drawn pet-celebration card — it's pawty time!" },
@@ -78,7 +78,7 @@ const PRODUCTS = [
 
   /* ---------------- MOM & DAD ---------------- */
   { id:"sunflower-mom", name:"Sunflower Mother's Day — Paper Cut", priceCents:600, category:"parents", emoji:"🌻", bg:"#f0e4dc", tag:"", rating:5.0, reviews:14, desc:"A layered paper-cut sunflower card for Mom. Bright and cheerful." },
-  { id:"flowerpot-mom", name:"Hand-Drawn Flower Pot — Mother's Day", priceCents:600, category:"parents", emoji:"🪴", bg:"#eef0e6", tag:"", rating:5.0, reviews:6, desc:"A charming hand-drawn flower pot card for Mom or any flower lover." },
+  { id:"flowerpot-mom", name:"Hand-Drawn Flower Pot — Mother's Day", priceCents:600, category:"parents", emoji:"🌷", bg:"#eef0e6", tag:"", rating:5.0, reviews:6, desc:"A charming hand-drawn flower pot card for Mom or any flower lover." },
   { id:"elephant-mom", name:"Elephant Mother's Day Card", priceCents:600, category:"parents", emoji:"🐘", bg:"#eef0e6", tag:"", rating:5.0, reviews:7, desc:"An elephant card for Mother's Day, a new mom, or a baby shower." },
   { id:"coffee-cup-mom", name:"Floral Coffee Cup — Mother's Day Gift Card Holder", priceCents:600, category:"parents", emoji:"☕", bg:"#f6e7e3", tag:"", rating:5.0, reviews:8, desc:"A handmade floral coffee-cup gift-card holder for Mom." },
   { id:"watering-can", name:"Watering Can Flower Card", priceCents:700, category:"parents", emoji:"🌼", bg:"#eef0e6", tag:"", rating:5.0, reviews:10, desc:"A handmade watering-can flower card for Mother's Day or a birthday." },

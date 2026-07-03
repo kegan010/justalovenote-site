@@ -12,6 +12,17 @@ What to do:
   2. Rename it to the exact filename below (all lowercase, keep the .jpg).
   3. Drop it in this folder, commit/upload to GitHub — it appears on the site.
 
+Multiple photos per card (image gallery):
+  The product page shows a gallery with left/right arrows. The MAIN photo is
+  <id>.jpg. To add more angles/photos of the same card, name them:
+      <id>-2.jpg , <id>-3.jpg , <id>-4.jpg , ... (up to -6)
+  Example for the cassette card:
+      cassette-classic.jpg     (main)
+      cassette-classic-2.jpg   (inside of the card)
+      cassette-classic-3.jpg   (a close-up)
+  Whichever extras exist automatically become slides with arrows and dots.
+  A card with only its main photo simply shows one image, no arrows.
+
 Tips for best results:
   - Use SQUARE images, about 1000 x 1000 pixels. The site crops to a square.
   - .jpg is expected. If you only have .png, you can either convert it to .jpg,

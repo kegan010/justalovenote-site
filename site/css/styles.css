@@ -165,6 +165,15 @@ footer li a:hover{color:#fff;opacity:1}
 /* keep the little badges above the photo */
 .card .tag,.card .fav{z-index:2}
 
+/* product gallery arrows + dots */
+.gal-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:42px;height:42px;border-radius:50%;border:none;background:rgba(255,255,255,.9);color:var(--ink);font-size:1.5rem;line-height:1;cursor:pointer;display:grid;place-items:center;box-shadow:0 2px 10px rgba(0,0,0,.18);transition:background .15s,transform .15s}
+.gal-arrow:hover{background:#fff;transform:translateY(-50%) scale(1.06)}
+.gal-prev{left:12px}
+.gal-next{right:12px}
+.gal-dots{position:absolute;bottom:14px;left:0;right:0;display:flex;gap:7px;justify-content:center;z-index:3}
+.gal-dot{width:9px;height:9px;border-radius:50%;border:none;background:rgba(255,255,255,.6);cursor:pointer;padding:0;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:background .15s}
+.gal-dot.active{background:#fff}
+
 /* ===== cart drawer ===== */
 .cart-overlay{position:fixed;inset:0;background:rgba(74,64,54,.45);opacity:0;visibility:hidden;transition:opacity .25s;z-index:80}
 .cart-overlay.open{opacity:1;visibility:visible}

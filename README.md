@@ -119,6 +119,10 @@ a time, in any order:
 
 The full list of exact filenames for every card is in `site/img/README.txt`.
 
+**Multiple photos per card:** the product page shows an image gallery with
+left/right arrows. The main photo is `<id>.jpg`; add extra angles as
+`<id>-2.jpg`, `<id>-3.jpg`, … (up to `-6`) and they become slides automatically.
+
 ---
 
 ## Things you can change easily

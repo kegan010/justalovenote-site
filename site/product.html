@@ -90,10 +90,15 @@
       <a href="shop.html" class="btn btn-primary">Browse all cards →</a></div>`;
   } else {
     document.title = p.name + " — Just a Love Note";
-    const art = coverArt(p);
     document.getElementById("pdp").innerHTML = `
       <div class="pdp">
-        <div class="gallery" style="background:${p.bg}">${art}</div>
+        <div class="gallery" id="gallery" style="background:${p.bg}">
+          <span class="art-emoji gallery-emoji">${p.emoji}</span>
+          <img class="art-photo gallery-photo" id="galleryPhoto" alt="${p.name.replace(/"/g,'&quot;')}" style="display:none">
+          <button class="gal-arrow gal-prev" id="galPrev" aria-label="Previous image" style="display:none">‹</button>
+          <button class="gal-arrow gal-next" id="galNext" aria-label="Next image" style="display:none">›</button>
+          <div class="gal-dots" id="galDots"></div>
+        </div>
         <div>
           <div class="crumbs"><a href="shop.html">Shop</a> › <a href="shop.html?cat=${p.category}">${cat?cat.label:''}</a> › ${p.name}</div>
           <h1>${p.name}</h1>
@@ -121,9 +126,55 @@
           </ul>`}
         </div>
       </div>`;
+    setupGallery(p);
   }
 
   function bump(d){ qty = Math.max(1, qty + d); document.getElementById("qtyVal").textContent = qty; }
+
+  // Build an image carousel: primary photo is img/<id>.jpg; extra angles are
+  // img/<id>-2.jpg, img/<id>-3.jpg, ... (up to -6). Whichever files exist become
+  // slides with left/right arrows + dots. If none exist, the emoji stays.
+  function setupGallery(p){
+    const candidates = [p.image || `img/${p.id}.jpg`];
+    for (let i = 2; i <= 6; i++) candidates.push(`img/${p.id}-${i}.jpg`);
+    const found = [];
+    let done = 0;
+    candidates.forEach((src, idx) => {
+      const im = new Image();
+      im.onload  = () => { found[idx] = src; if (++done === candidates.length) render(); };
+      im.onerror = () => { if (++done === candidates.length) render(); };
+      im.src = src;
+    });
+
+    function render(){
+      const imgs = found.filter(Boolean);       // keeps original order
+      if (imgs.length === 0) return;             // no photos yet — leave the emoji
+      const photo = document.getElementById("galleryPhoto");
+      const emoji = document.querySelector(".gallery-emoji");
+      const prev = document.getElementById("galPrev");
+      const next = document.getElementById("galNext");
+      const dots = document.getElementById("galDots");
+      let cur = 0;
+
+      emoji.style.display = "none";
+      photo.style.display = "";
+
+      const update = () => {
+        photo.src = imgs[cur];
+        dots.querySelectorAll(".gal-dot").forEach((d, i) => d.classList.toggle("active", i === cur));
+      };
+      const go = i => { cur = (i + imgs.length) % imgs.length; update(); };
+
+      if (imgs.length > 1) {
+        prev.style.display = ""; next.style.display = "";
+        prev.onclick = () => go(cur - 1);
+        next.onclick = () => go(cur + 1);
+        dots.innerHTML = imgs.map((_, i) => `<button class="gal-dot" data-i="${i}" aria-label="Image ${i+1}"></button>`).join("");
+        dots.querySelectorAll(".gal-dot").forEach(d => d.onclick = () => go(+d.dataset.i));
+      }
+      update();
+    }
+  }
 
   // related: same category, else random others
   if (p){
