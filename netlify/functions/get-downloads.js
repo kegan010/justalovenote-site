@@ -11,18 +11,13 @@
 
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
-/* id -> { name, file } for every digital product.
-   `file` is a path inside site/ (served as the public website). */
-const DIGITAL_FILES = {
-  "printable-dad":          { name: "Printable Father's Day Card",  file: "downloads/printable-fathers-day.pdf" },
-  "printable-grandma":      { name: "Printable Grandma Birthday",   file: "downloads/printable-grandma-birthday.pdf" },
-  "printable-auntie":       { name: "Printable Auntie Birthday",    file: "downloads/printable-auntie-birthday.pdf" },
-  "printable-nana":         { name: "Printable Nana Birthday",      file: "downloads/printable-nana-birthday.pdf" },
-  "color-mom":              { name: "Color-Your-Own Mother's Day",  file: "downloads/color-your-own-mothers-day.pdf" },
-  "minimalist-thankyou-pdf":{ name: "Minimalist Thank You (PDF)",   file: "downloads/minimalist-thank-you.pdf" },
-  "rainbow-love-svg":       { name: "Rainbow Love Card (SVG)",      file: "downloads/rainbow-love-card-svg.zip" },
-  "candy-corn-svg":         { name: "Candy Corn Card (SVG)",        file: "downloads/candy-corn-card-svg.zip" }
-};
+/* id -> { name, file } for every digital product — derived from the
+   one shared catalog in site/js/products.js (single source of truth). */
+const { PRODUCTS } = require("../../site/js/products.js");
+const DIGITAL_FILES = {};
+for (const p of PRODUCTS) {
+  if (p.type === "digital" && p.file) DIGITAL_FILES[p.id] = { name: p.name, file: p.file };
+}
 
 exports.handler = async (event) => {
   if (!process.env.STRIPE_SECRET_KEY)
