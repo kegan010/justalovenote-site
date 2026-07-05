@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /success.html
+Disallow: /cancel.html
+Disallow: /contact-thanks.html
+
+Sitemap: https://justalovenote.com/sitemap.xml

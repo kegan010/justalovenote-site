@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Card — Just a Love Note</title>
+<meta name="description" content="Handmade paper-cut greeting cards from Just a Love Note — hand-cut, blank inside, made in Orange, California." id="metaDesc">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -90,6 +91,33 @@
       <a href="shop.html" class="btn btn-primary">Browse all cards →</a></div>`;
   } else {
     document.title = p.name + " — Just a Love Note";
+    document.getElementById("metaDesc").setAttribute("content", p.desc);
+
+    // Product structured data so Google can show price + star rating in results.
+    const ld = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      "name": p.name,
+      "description": p.desc,
+      "image": `https://justalovenote.com/img/${p.id}.jpg`,
+      "url": `https://justalovenote.com/product.html?id=${p.id}`,
+      "brand": { "@type": "Brand", "name": "Just a Love Note" },
+      "offers": {
+        "@type": "Offer",
+        "price": (p.priceCents / 100).toFixed(2),
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock",
+        "url": `https://justalovenote.com/product.html?id=${p.id}`
+      }
+    };
+    if (p.reviews > 0) ld.aggregateRating = {
+      "@type": "AggregateRating", "ratingValue": p.rating.toFixed(1),
+      "reviewCount": p.reviews, "bestRating": "5"
+    };
+    const ldTag = document.createElement("script");
+    ldTag.type = "application/ld+json";
+    ldTag.textContent = JSON.stringify(ld);
+    document.head.appendChild(ldTag);
     document.getElementById("pdp").innerHTML = `
       <div class="pdp">
         <div class="gallery" id="gallery" style="background:${p.bg}">

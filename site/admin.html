@@ -58,6 +58,12 @@
   .drop{border:2px dashed var(--line);border-radius:12px;padding:18px;text-align:center;color:var(--ink-soft);font-size:.9rem;cursor:pointer;transition:border-color .15s}
   .drop.over{border-color:var(--rose)}
   .drop img{max-width:140px;max-height:140px;border-radius:10px;display:block;margin:0 auto 8px}
+  .slots{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+  .slot{position:relative;aspect-ratio:1;border:2px dashed var(--line);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;font-size:1.3rem;color:var(--ink-soft);background:var(--blush);transition:border-color .15s}
+  .slot.over{border-color:var(--rose)}
+  .slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .slot .x{position:absolute;top:3px;right:3px;background:rgba(0,0,0,.55);color:#fff;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;z-index:2;font-size:.8rem;line-height:1;padding:0}
+  .slot .lab{position:absolute;bottom:3px;left:4px;font-size:.65rem;font-weight:700;background:rgba(255,255,255,.85);padding:1px 6px;border-radius:6px;z-index:2}
   .modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
   .err{color:var(--warn);font-size:.88rem;margin-top:10px;font-weight:700}
   /* publish bar */
@@ -125,8 +131,9 @@
     </div>
     <div class="f"><label>Description</label><textarea id="m-desc" placeholder="A short, warm sentence or two about the card."></textarea></div>
     <div class="f">
-      <label>Photo (auto-cropped square, 1000×1000)</label>
-      <div class="drop" id="drop">Drag a photo here, or click to choose<input type="file" id="file" accept="image/*" hidden></div>
+      <label>Photos — up to 6, the first is the main one (auto-cropped square, 1000×1000)</label>
+      <div class="slots" id="slots"></div>
+      <p class="note" style="margin-top:6px">Click a slot (or drag photos onto it) to add or replace. Drop several at once to fill the following slots. Extra photos show as a swipeable gallery on the card's page.</p>
     </div>
     <div class="f"><label><input type="checkbox" id="m-digital" style="width:auto;margin-right:8px">This is a digital download (no shipping)</label></div>
     <div class="f" id="f-dl" hidden>
@@ -143,6 +150,9 @@
     </div>
   </div>
 </div>
+
+<input type="file" id="file" accept="image/*" hidden>
+<input type="file" id="slotFile" accept="image/*" multiple hidden>
 
 <!-- PUBLISH BAR -->
 <div class="pubbar" id="pubbar">
@@ -164,7 +174,7 @@ let token = localStorage.getItem(LS_KEY) || "";
 let rawText = "";          // full current products.js text
 let categories = [];       // from products.js
 let products = [];         // working copy
-let stagedPhotos = {};     // id -> {b64, preview}
+let stagedPhotos = {};     // id -> { slot(1-6): {b64, preview} | {del:true} }
 let stagedFiles = {};      // repo path -> b64   (digital downloads)
 let catalogDirty = false;
 let editing = null;        // id being edited, or null for new
@@ -206,7 +216,8 @@ function render() {
   const list = products.filter(p => !cat || p.category === cat);
   $("count").textContent = `(${products.filter(p=>!p._deleted).length})`;
   $("grid").innerHTML = list.map(p => {
-    const photo = stagedPhotos[p.id] ? stagedPhotos[p.id].preview : `img/${p.id}.jpg`;
+    const s1 = stagedPhotos[p.id] && stagedPhotos[p.id][1];
+    const photo = (s1 && s1.preview) ? s1.preview : `img/${p.id}.jpg`;
     const changed = p._changed || stagedPhotos[p.id];
     return `<div class="card ${changed?'changed':''} ${p._deleted?'deleted':''}">
       ${p.tag ? `<span class="badge">${p.tag}</span>` : ""}
@@ -220,7 +231,8 @@ function render() {
         </div>
       </div></div>`;
   }).join("") || `<p class="note">No cards in this category yet.</p>`;
-  const n = products.filter(p=>p._changed||p._deleted).length + Object.keys(stagedPhotos).length + Object.keys(stagedFiles).length;
+  const photoCount = Object.values(stagedPhotos).reduce((a, s) => a + Object.keys(s).length, 0);
+  const n = products.filter(p=>p._changed||p._deleted).length + photoCount + Object.keys(stagedFiles).length;
   $("pubbar").classList.toggle("show", n > 0);
   $("pending").textContent = `${n} unpublished change${n===1?"":"s"}.`;
 }
@@ -240,27 +252,46 @@ function cropSquare(file) {
     img.src = URL.createObjectURL(file);
   });
 }
-let photoTarget = null; // card id for quick photo swap
+let photoTarget = null; // card id for quick main-photo swap from the grid
 function pickPhoto(id) { photoTarget = id; $("file").click(); }
-async function handlePhoto(file) {
-  if (!file || !file.type.startsWith("image/")) return;
-  const out = await cropSquare(file);
-  if (editing !== null || photoTarget === null) { // inside modal
-    modalPhoto = out;
-    $("drop").innerHTML = `<img src="${out.preview}">Looks good — will be saved as the card photo`;
-  } else {
-    stagedPhotos[photoTarget] = out;
-    photoTarget = null;
-    render();
+
+/* --- photo slots inside the edit modal --- */
+let modalSlots = {}, currentSlot = 1;
+function slotSrc(s) { // existing published photo for this slot, if any
+  if (!editing) return null;
+  return s === 1 ? `img/${editing}.jpg` : `img/${editing}-${s}.jpg`;
+}
+function renderSlots() {
+  let html = "";
+  for (let s = 1; s <= 6; s++) {
+    const st = modalSlots[s];
+    html += `<div class="slot" data-s="${s}">`;
+    if (st && st.del) html += `<span style="font-size:.68rem;text-align:center;z-index:1">will be<br>removed</span>`;
+    else if (st) html += `<img src="${st.preview}"><button class="x" data-x="${s}">×</button>`;
+    else {
+      html += `+`;
+      const src = slotSrc(s);
+      if (src) html += `<img src="${src}" onerror="this.remove()" onload="this.insertAdjacentHTML('afterend','<button class=x data-x=${s} data-existing=1>×</button>')">`;
+    }
+    html += `<span class="lab">${s === 1 ? "main" : s}</span></div>`;
   }
+  $("slots").innerHTML = html;
+}
+async function addSlotFiles(files) {
+  for (const f of files) {
+    if (currentSlot > 6) break;
+    if (!f.type.startsWith("image/")) continue;
+    modalSlots[currentSlot++] = await cropSquare(f);
+  }
+  renderSlots();
 }
 
 /* ================= modal ================= */
-let modalPhoto = null, modalDl = null;
+let modalDl = null;
 function openEdit(id) {
   const p = id ? products.find(x => x.id === id) : null;
   editing = id || "";
-  modalPhoto = null; modalDl = null;
+  modalSlots = {}; currentSlot = 1; modalDl = null;
   $("m-title").textContent = p ? "Edit: " + p.name : "New card";
   $("m-name").value = p ? p.name : "";
   $("m-price").value = p ? (p.priceCents/100).toFixed(2) : "6.00";
@@ -274,7 +305,7 @@ function openEdit(id) {
   $("m-digital").checked = p ? p.type === "digital" : false;
   $("f-dl").hidden = !$("m-digital").checked;
   $("dl-current").textContent = p && p.file ? "Current file: " + p.file : "";
-  $("drop").innerHTML = `Drag a photo here, or click to choose<input type="file" id="file2" accept="image/*" hidden>`;
+  renderSlots();
   $("m-delete").hidden = !p;
   $("m-err").textContent = "";
   $("overlay").classList.add("open");
@@ -308,7 +339,7 @@ function saveModal() {
     if (modalDl) { p.file = "downloads/" + modalDl.name; stagedFiles["site/downloads/" + modalDl.name] = modalDl.b64; }
   } else { delete p.type; delete p.file; }
   if (isNew) products.push(p);
-  if (modalPhoto) stagedPhotos[id] = modalPhoto;
+  if (Object.keys(modalSlots).length) stagedPhotos[id] = Object.assign(stagedPhotos[id] || {}, modalSlots);
   catalogDirty = true;
   closeModal(); render();
 }
@@ -347,9 +378,13 @@ async function publish() {
     const base = await gh(`/git/commits/${ref.object.sha}`);
     const tree = [];
     log("Uploading photos & files…");
-    for (const [id, ph] of Object.entries(stagedPhotos)) {
-      const blob = await gh(`/git/blobs`, {method:"POST", body: JSON.stringify({content: ph.b64, encoding:"base64"})});
-      tree.push({ path: `site/img/${id}.jpg`, mode: "100644", type: "blob", sha: blob.sha });
+    for (const [id, slots] of Object.entries(stagedPhotos)) {
+      for (const [s, ph] of Object.entries(slots)) {
+        const path = s == 1 ? `site/img/${id}.jpg` : `site/img/${id}-${s}.jpg`;
+        if (ph.del) { tree.push({ path, mode: "100644", type: "blob", sha: null }); continue; }
+        const blob = await gh(`/git/blobs`, {method:"POST", body: JSON.stringify({content: ph.b64, encoding:"base64"})});
+        tree.push({ path, mode: "100644", type: "blob", sha: blob.sha });
+      }
     }
     for (const [path, b64] of Object.entries(stagedFiles)) {
       const blob = await gh(`/git/blobs`, {method:"POST", body: JSON.stringify({content: b64, encoding:"base64"})});
@@ -394,17 +429,32 @@ $("m-delete").onclick = () => {
 };
 $("discard").onclick = () => { if (confirm("Throw away all unpublished changes?")) { stagedPhotos={}; stagedFiles={}; catalogDirty=false; load(); } };
 $("publish").onclick = publish;
-$("file").onchange = e => handlePhoto(e.target.files[0]);
-// modal photo drop zone (delegated, since innerHTML is reset)
-$("drop").addEventListener("click", e => {
-  if (e.target.tagName === "INPUT") return; // don't re-trigger when the input's own click bubbles
-  const f = $("drop").querySelector("input") || $("file"); photoTarget = null; f.click();
+// quick main-photo swap from the grid
+$("file").onchange = async e => {
+  const f = e.target.files[0]; e.target.value = "";
+  if (!f || !photoTarget || !f.type.startsWith("image/")) return;
+  const out = await cropSquare(f);
+  stagedPhotos[photoTarget] = Object.assign(stagedPhotos[photoTarget] || {}, { 1: out });
+  photoTarget = null; render();
+};
+// photo slots in the edit modal
+$("slots").addEventListener("click", e => {
+  const x = e.target.closest("[data-x]");
+  if (x) {
+    const s = +x.dataset.x;
+    if (x.dataset.existing) modalSlots[s] = { del: true };  // stage removal of a published photo
+    else delete modalSlots[s];                              // un-stage a just-added one
+    renderSlots(); return;
+  }
+  const slot = e.target.closest(".slot");
+  if (slot) { currentSlot = +slot.dataset.s; $("slotFile").click(); }
 });
-$("drop").addEventListener("change", e => { if (e.target.matches("input[type=file]")) handlePhoto(e.target.files[0]); });
-["dragover","dragleave","drop"].forEach(ev => $("drop").addEventListener(ev, e => {
-  e.preventDefault(); $("drop").classList.toggle("over", ev === "dragover");
-  if (ev === "drop") { photoTarget = null; handlePhoto(e.dataTransfer.files[0]); }
+["dragover","dragleave","drop"].forEach(ev => $("slots").addEventListener(ev, e => {
+  const slot = e.target.closest(".slot"); if (!slot) return;
+  e.preventDefault(); slot.classList.toggle("over", ev === "dragover");
+  if (ev === "drop") { currentSlot = +slot.dataset.s; addSlotFiles(e.dataTransfer.files); }
 }));
+$("slotFile").onchange = e => { addSlotFiles(e.target.files); e.target.value = ""; };
 $("dl-drop").addEventListener("click", () => $("dl-file").click());
 $("dl-file").onchange = async e => {
   const f = e.target.files[0]; if (!f) return;
