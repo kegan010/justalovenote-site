@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Card Manager — Just a Love Note</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Fraunces:opsz,wght@9..144,600&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --rose:#d98a7e; --rose-deep:#c26f62; --blush:#fdf6f2; --cream:#fbf3ec; --ink:#3f3630; --ink-soft:#7a6f66; --line:#eadfd5; --sage:#8a9b7d; --ok:#4c7a4c; --warn:#a04040; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Nunito Sans',sans-serif;background:var(--cream);color:var(--ink);padding-bottom:120px}
+  h1,h2,h3{font-family:'Fraunces',serif}
+  .top{background:#fff;border-bottom:1px solid var(--line);padding:14px 22px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:20}
+  .top .script{font-family:'Caveat',cursive;color:var(--rose-deep);font-size:1.3rem}
+  .top .grow{flex:1}
+  .wrap{max-width:1080px;margin:0 auto;padding:26px 22px}
+  .btn{display:inline-flex;align-items:center;gap:8px;border:none;border-radius:999px;padding:10px 20px;font-weight:700;font-size:.95rem;cursor:pointer;font-family:inherit}
+  .btn-primary{background:var(--rose);color:#fff}.btn-primary:hover{background:var(--rose-deep)}
+  .btn-ghost{background:transparent;border:1.5px solid var(--line);color:var(--ink)}
+  .btn-danger{background:transparent;border:1.5px solid #d8b0aa;color:var(--warn)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .note{color:var(--ink-soft);font-size:.9rem;line-height:1.6}
+  /* token gate */
+  .gate{max-width:560px;margin:60px auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:34px}
+  .gate h1{font-size:1.6rem;margin-bottom:8px}
+  .gate ol{margin:14px 0 18px 20px;line-height:1.8;font-size:.93rem;color:var(--ink-soft)}
+  .gate input{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:.95rem;font-family:inherit;margin:8px 0 14px}
+  .gate a{color:var(--rose-deep);font-weight:700}
+  /* grid */
+  .toolbar{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+  .toolbar h1{font-size:1.5rem;flex:1}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;position:relative}
+  .card.changed{outline:2.5px solid var(--sage)}
+  .card.deleted{opacity:.4}
+  .card .art{height:150px;display:flex;align-items:center;justify-content:center;font-size:3rem;position:relative;overflow:hidden}
+  .card .art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .card .body{padding:12px 14px}
+  .card .name{font-weight:700;font-size:.9rem;line-height:1.35;min-height:2.5em}
+  .card .meta{color:var(--ink-soft);font-size:.83rem;margin:4px 0 10px}
+  .card .row{display:flex;gap:8px}
+  .card .row .btn{padding:6px 14px;font-size:.83rem}
+  .badge{position:absolute;top:8px;left:8px;background:var(--sage);color:#fff;font-size:.7rem;font-weight:700;padding:3px 9px;border-radius:999px;z-index:2}
+  /* modal */
+  .overlay{position:fixed;inset:0;background:rgba(63,54,48,.45);display:none;align-items:flex-start;justify-content:center;z-index:40;overflow:auto;padding:30px 14px}
+  .overlay.open{display:flex}
+  .modal{background:#fff;border-radius:18px;max-width:640px;width:100%;padding:28px}
+  .modal h2{font-size:1.3rem;margin-bottom:16px}
+  .f{margin-bottom:14px}
+  .f label{display:block;font-weight:700;font-size:.83rem;margin-bottom:5px}
+  .f input,.f select,.f textarea{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:.93rem;font-family:inherit}
+  .f textarea{min-height:70px;resize:vertical}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  .drop{border:2px dashed var(--line);border-radius:12px;padding:18px;text-align:center;color:var(--ink-soft);font-size:.9rem;cursor:pointer;transition:border-color .15s}
+  .drop.over{border-color:var(--rose)}
+  .drop img{max-width:140px;max-height:140px;border-radius:10px;display:block;margin:0 auto 8px}
+  .modal .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+  .err{color:var(--warn);font-size:.88rem;margin-top:10px;font-weight:700}
+  /* publish bar */
+  .pubbar{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:#fff;padding:14px 22px;display:none;align-items:center;gap:16px;z-index:30}
+  .pubbar.show{display:flex}
+  .pubbar .grow{flex:1;font-size:.93rem}
+  .pubbar .btn-primary{background:var(--sage)}
+  #log{font-size:.85rem;opacity:.85}
+  @media(max-width:600px){.cols,.cols3{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <span style="font-size:1.4rem">💌</span>
+  <div><b>Just a Love Note</b> — Card Manager <span class="script">for Lauren's eyes only</span></div>
+  <div class="grow"></div>
+  <a class="btn btn-ghost" href="shop.html" target="_blank">View shop ↗</a>
+  <button class="btn btn-ghost" id="forget" hidden>Forget token</button>
+</div>
+
+<!-- TOKEN GATE -->
+<div class="gate" id="gate">
+  <h1>Connect to GitHub</h1>
+  <p class="note">This page publishes card changes straight to your GitHub repo (which redeploys the site). It needs a GitHub token — created once, stored only in this browser.</p>
+  <ol>
+    <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank">github.com → fine-grained tokens</a></li>
+    <li>Name: <b>card manager</b> · Expiration: 1 year</li>
+    <li>Repository access: <b>Only select repositories</b> → <b>justalovenote-site</b></li>
+    <li>Permissions → Repository permissions → <b>Contents: Read and write</b></li>
+    <li>Generate, copy the token, paste below:</li>
+  </ol>
+  <input type="password" id="token" placeholder="github_pat_…">
+  <button class="btn btn-primary" id="connect">Connect →</button>
+  <div class="err" id="gate-err"></div>
+</div>
+
+<!-- MAIN -->
+<div class="wrap" id="main" hidden>
+  <div class="toolbar">
+    <h1>Your cards <span class="note" id="count"></span></h1>
+    <select id="filter" style="padding:9px 12px;border:1.5px solid var(--line);border-radius:10px;font-family:inherit"></select>
+    <button class="btn btn-primary" id="add">+ New card</button>
+  </div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2 id="m-title">Edit card</h2>
+    <div class="f"><label>Card name</label><input id="m-name" placeholder="Funny Sloth Birthday — Slow Down, It's Your Day"></div>
+    <div class="cols">
+      <div class="f"><label>Price (dollars)</label><input id="m-price" type="number" step="0.25" min="0.5" placeholder="6.00"></div>
+      <div class="f"><label>Category</label><select id="m-cat"></select></div>
+    </div>
+    <div class="cols3">
+      <div class="f"><label>Badge (optional)</label><input id="m-tag" placeholder="New / Set / Embossed"></div>
+      <div class="f"><label>Fallback emoji</label><input id="m-emoji" placeholder="🦥"></div>
+      <div class="f"><label>Tile color</label><input id="m-bg" type="color" value="#f5e6df" style="height:42px;padding:4px"></div>
+    </div>
+    <div class="cols">
+      <div class="f"><label>Rating</label><input id="m-rating" type="number" step="0.1" min="0" max="5" value="5.0"></div>
+      <div class="f"><label># of reviews</label><input id="m-reviews" type="number" min="0" value="0"></div>
+    </div>
+    <div class="f"><label>Description</label><textarea id="m-desc" placeholder="A short, warm sentence or two about the card."></textarea></div>
+    <div class="f">
+      <label>Photo (auto-cropped square, 1000×1000)</label>
+      <div class="drop" id="drop">Drag a photo here, or click to choose<input type="file" id="file" accept="image/*" hidden></div>
+    </div>
+    <div class="f"><label><input type="checkbox" id="m-digital" style="width:auto;margin-right:8px">This is a digital download (no shipping)</label></div>
+    <div class="f" id="f-dl" hidden>
+      <label>Download file (PDF or ZIP the buyer receives)</label>
+      <div class="drop" id="dl-drop">Drag the PDF/ZIP here, or click to choose<input type="file" id="dl-file" accept=".pdf,.zip" hidden></div>
+      <p class="note" id="dl-current"></p>
+    </div>
+    <div class="err" id="m-err"></div>
+    <div class="actions">
+      <button class="btn btn-danger" id="m-delete" hidden>Delete card</button>
+      <div style="flex:1"></div>
+      <button class="btn btn-ghost" id="m-cancel">Cancel</button>
+      <button class="btn btn-primary" id="m-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- PUBLISH BAR -->
+<div class="pubbar" id="pubbar">
+  <div class="grow"><b id="pending"></b> <span id="log"></span><br>
+  <span style="font-size:.8rem;opacity:.75">Publishing makes one GitHub commit → one Netlify deploy (≈15 credits). Batch up your changes, then publish once.</span></div>
+  <button class="btn btn-ghost" id="discard" style="color:#fff;border-color:rgba(255,255,255,.4)">Discard</button>
+  <button class="btn btn-primary" id="publish">Publish to site →</button>
+</div>
+
+<script>
+/* ================= config ================= */
+const OWNER = "kegan010", REPO = "justalovenote-site", BRANCH = "main";
+const CATALOG_PATH = "site/js/products.js";
+const API = `https://api.github.com/repos/${OWNER}/${REPO}`;
+const LS_KEY = "jaln_admin_token";
+
+/* ================= state ================= */
+let token = localStorage.getItem(LS_KEY) || "";
+let rawText = "";          // full current products.js text
+let categories = [];       // from products.js
+let products = [];         // working copy
+let stagedPhotos = {};     // id -> {b64, preview}
+let stagedFiles = {};      // repo path -> b64   (digital downloads)
+let catalogDirty = false;
+let editing = null;        // id being edited, or null for new
+
+/* ================= helpers ================= */
+const $ = id => document.getElementById(id);
+const money = c => "$" + (c/100).toFixed(2);
+async function gh(path, opts = {}) {
+  const r = await fetch(API + path, { ...opts,
+    headers: { "Authorization": "Bearer " + token, "Accept": "application/vnd.github+json",
+               ...(opts.body ? {"Content-Type":"application/json"} : {}), ...(opts.headers||{}) } });
+  if (!r.ok) throw new Error(`GitHub ${r.status}: ${(await r.json().catch(()=>({}))).message || r.statusText}`);
+  return r.json();
+}
+function b64ToUtf8(b64) {
+  const bin = atob(b64.replace(/\n/g, ""));
+  return new TextDecoder("utf-8").decode(Uint8Array.from(bin, c => c.charCodeAt(0)));
+}
+function slugify(s) {
+  return s.toLowerCase().replace(/['’]/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").split("-").slice(0,4).join("-");
+}
+
+/* ================= load ================= */
+async function load() {
+  const f = await gh(`/contents/${encodeURIComponent(CATALOG_PATH)}?ref=${BRANCH}`);
+  rawText = b64ToUtf8(f.content);
+  const mod = new Function(rawText + ";return {CATEGORIES, PRODUCTS};")();
+  categories = mod.CATEGORIES;
+  products = mod.PRODUCTS.map(p => ({...p}));
+  $("filter").innerHTML = `<option value="">All categories</option>` +
+    categories.map(c => `<option value="${c.id}">${c.label}</option>`).join("");
+  $("m-cat").innerHTML = categories.map(c => `<option value="${c.id}">${c.label}</option>`).join("");
+  render();
+}
+
+/* ================= render ================= */
+function render() {
+  const cat = $("filter").value;
+  const list = products.filter(p => !cat || p.category === cat);
+  $("count").textContent = `(${products.filter(p=>!p._deleted).length})`;
+  $("grid").innerHTML = list.map(p => {
+    const photo = stagedPhotos[p.id] ? stagedPhotos[p.id].preview : `img/${p.id}.jpg`;
+    const changed = p._changed || stagedPhotos[p.id];
+    return `<div class="card ${changed?'changed':''} ${p._deleted?'deleted':''}">
+      ${p.tag ? `<span class="badge">${p.tag}</span>` : ""}
+      <div class="art" style="background:${p.bg||'#f5e6df'}">${p.emoji||"💌"}<img src="${photo}" onerror="this.remove()" alt=""></div>
+      <div class="body">
+        <div class="name">${p.name}</div>
+        <div class="meta">${money(p.priceCents)} · ${p.category}${p.type==='digital'?' · digital':''}${p._deleted?' · <b>will be removed</b>':''}</div>
+        <div class="row">
+          <button class="btn btn-ghost" onclick="openEdit('${p.id}')">Edit</button>
+          <button class="btn btn-ghost" onclick="pickPhoto('${p.id}')">📷 Photo</button>
+        </div>
+      </div></div>`;
+  }).join("") || `<p class="note">No cards in this category yet.</p>`;
+  const n = products.filter(p=>p._changed||p._deleted).length + Object.keys(stagedPhotos).length + Object.keys(stagedFiles).length;
+  $("pubbar").classList.toggle("show", n > 0);
+  $("pending").textContent = `${n} unpublished change${n===1?"":"s"}.`;
+}
+
+/* ================= photo cropping ================= */
+function cropSquare(file) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => {
+      const s = Math.min(img.width, img.height), c = document.createElement("canvas");
+      c.width = c.height = Math.min(1000, s);
+      c.getContext("2d").drawImage(img, (img.width-s)/2, (img.height-s)/2, s, s, 0, 0, c.width, c.height);
+      const dataUrl = c.toDataURL("image/jpeg", 0.85);
+      res({ b64: dataUrl.split(",")[1], preview: dataUrl });
+    };
+    img.onerror = rej;
+    img.src = URL.createObjectURL(file);
+  });
+}
+let photoTarget = null; // card id for quick photo swap
+function pickPhoto(id) { photoTarget = id; $("file").click(); }
+async function handlePhoto(file) {
+  if (!file || !file.type.startsWith("image/")) return;
+  const out = await cropSquare(file);
+  if (editing !== null || photoTarget === null) { // inside modal
+    modalPhoto = out;
+    $("drop").innerHTML = `<img src="${out.preview}">Looks good — will be saved as the card photo`;
+  } else {
+    stagedPhotos[photoTarget] = out;
+    photoTarget = null;
+    render();
+  }
+}
+
+/* ================= modal ================= */
+let modalPhoto = null, modalDl = null;
+function openEdit(id) {
+  const p = id ? products.find(x => x.id === id) : null;
+  editing = id || "";
+  modalPhoto = null; modalDl = null;
+  $("m-title").textContent = p ? "Edit: " + p.name : "New card";
+  $("m-name").value = p ? p.name : "";
+  $("m-price").value = p ? (p.priceCents/100).toFixed(2) : "6.00";
+  $("m-cat").value = p ? p.category : "birthday";
+  $("m-tag").value = p ? (p.tag||"") : "New";
+  $("m-emoji").value = p ? (p.emoji||"") : "💌";
+  $("m-bg").value = p ? (p.bg||"#f5e6df") : "#f5e6df";
+  $("m-rating").value = p ? p.rating : 5.0;
+  $("m-reviews").value = p ? p.reviews : 0;
+  $("m-desc").value = p ? (p.desc||"") : "";
+  $("m-digital").checked = p ? p.type === "digital" : false;
+  $("f-dl").hidden = !$("m-digital").checked;
+  $("dl-current").textContent = p && p.file ? "Current file: " + p.file : "";
+  $("drop").innerHTML = `Drag a photo here, or click to choose<input type="file" id="file2" accept="image/*" hidden>`;
+  $("m-delete").hidden = !p;
+  $("m-err").textContent = "";
+  $("overlay").classList.add("open");
+}
+function closeModal(){ $("overlay").classList.remove("open"); editing = null; }
+
+function saveModal() {
+  const name = $("m-name").value.trim();
+  const price = Math.round(parseFloat($("m-price").value) * 100);
+  const desc = $("m-desc").value.trim();
+  const digital = $("m-digital").checked;
+  if (!name) return $("m-err").textContent = "Please give the card a name.";
+  if (!price || price < 50) return $("m-err").textContent = "Please set a valid price.";
+  const isNew = editing === "";
+  const id = isNew ? slugify(name) : editing;
+  if (isNew && products.some(p => p.id === id)) return $("m-err").textContent = `A card with id "${id}" already exists — tweak the name slightly.`;
+  if (isNew && digital && !modalDl) return $("m-err").textContent = "Digital cards need their PDF/ZIP file attached.";
+
+  let p = isNew ? {} : products.find(x => x.id === editing);
+  Object.assign(p, {
+    id, name, priceCents: price,
+    category: digital ? "digital" : $("m-cat").value,
+    emoji: $("m-emoji").value.trim() || "💌",
+    bg: $("m-bg").value, tag: $("m-tag").value.trim(),
+    rating: parseFloat($("m-rating").value) || 5.0,
+    reviews: parseInt($("m-reviews").value) || 0,
+    desc, _changed: true
+  });
+  if (digital) {
+    p.type = "digital";
+    if (modalDl) { p.file = "downloads/" + modalDl.name; stagedFiles["site/downloads/" + modalDl.name] = modalDl.b64; }
+  } else { delete p.type; delete p.file; }
+  if (isNew) products.push(p);
+  if (modalPhoto) stagedPhotos[id] = modalPhoto;
+  catalogDirty = true;
+  closeModal(); render();
+}
+
+/* ================= serialize & publish ================= */
+function serializeProduct(p) {
+  const parts = [`id:${JSON.stringify(p.id)}`, `name:${JSON.stringify(p.name)}`,
+    `priceCents:${p.priceCents}`, `category:${JSON.stringify(p.category)}`];
+  if (p.type === "digital") parts.push(`type:"digital"`, `file:${JSON.stringify(p.file||"")}`);
+  parts.push(`emoji:${JSON.stringify(p.emoji||"💌")}`, `bg:${JSON.stringify(p.bg||"#f5e6df")}`,
+    `tag:${JSON.stringify(p.tag||"")}`, `rating:${Number(p.rating||5).toFixed(1)}`,
+    `reviews:${p.reviews||0}`, `desc:${JSON.stringify(p.desc||"")}`);
+  return `  { ${parts.join(", ")} }`;
+}
+function buildCatalogText() {
+  const live = products.filter(p => !p._deleted);
+  let block = "const PRODUCTS = [\n";
+  categories.forEach(c => {
+    const rows = live.filter(p => p.category === c.id);
+    if (!rows.length) return;
+    block += `  /* ---------------- ${c.label.toUpperCase()} ---------------- */\n`;
+    block += rows.map(serializeProduct).join(",\n") + ",\n\n";
+  });
+  const stray = live.filter(p => !categories.some(c => c.id === p.category));
+  if (stray.length) block += stray.map(serializeProduct).join(",\n") + ",\n";
+  block = block.replace(/,\n\n$/, "\n") .replace(/,\n$/, "\n");
+  block += "];";
+  return rawText.replace(/const PRODUCTS = \[[\s\S]*?\n\];/, block);
+}
+async function publish() {
+  const btn = $("publish"); btn.disabled = true;
+  const log = m => $("log").textContent = m;
+  try {
+    log("Reading current version…");
+    const ref = await gh(`/git/ref/heads/${BRANCH}`);
+    const base = await gh(`/git/commits/${ref.object.sha}`);
+    const tree = [];
+    log("Uploading photos & files…");
+    for (const [id, ph] of Object.entries(stagedPhotos)) {
+      const blob = await gh(`/git/blobs`, {method:"POST", body: JSON.stringify({content: ph.b64, encoding:"base64"})});
+      tree.push({ path: `site/img/${id}.jpg`, mode: "100644", type: "blob", sha: blob.sha });
+    }
+    for (const [path, b64] of Object.entries(stagedFiles)) {
+      const blob = await gh(`/git/blobs`, {method:"POST", body: JSON.stringify({content: b64, encoding:"base64"})});
+      tree.push({ path, mode: "100644", type: "blob", sha: blob.sha });
+    }
+    if (catalogDirty || products.some(p=>p._changed||p._deleted)) {
+      log("Updating catalog…");
+      const blob = await gh(`/git/blobs`, {method:"POST", body: JSON.stringify({content: buildCatalogText(), encoding:"utf-8"})});
+      tree.push({ path: CATALOG_PATH, mode: "100644", type: "blob", sha: blob.sha });
+    }
+    log("Creating commit…");
+    const newTree = await gh(`/git/trees`, {method:"POST", body: JSON.stringify({ base_tree: base.tree.sha, tree })});
+    const n = tree.length;
+    const commit = await gh(`/git/commits`, {method:"POST", body: JSON.stringify({
+      message: `Update cards via admin (${n} file${n===1?"":"s"})`, tree: newTree.sha, parents: [ref.object.sha] })});
+    await gh(`/git/refs/heads/${BRANCH}`, {method:"PATCH", body: JSON.stringify({ sha: commit.sha })});
+    log("Published! Netlify is deploying — changes go live in ~30 seconds. 💌");
+    stagedPhotos = {}; stagedFiles = {}; catalogDirty = false;
+    await load();
+  } catch (e) {
+    log(""); alert("Publish failed: " + e.message + "\nNothing was half-saved — a commit either fully happens or not at all. Fix the issue and try again.");
+  }
+  btn.disabled = false;
+}
+
+/* ================= wiring ================= */
+$("connect").onclick = async () => {
+  token = $("token").value.trim();
+  if (!token) return;
+  try { await gh(""); localStorage.setItem(LS_KEY, token); boot(); }
+  catch(e){ $("gate-err").textContent = "That token didn't work: " + e.message; }
+};
+$("forget").onclick = () => { localStorage.removeItem(LS_KEY); location.reload(); };
+$("add").onclick = () => openEdit(null);
+$("filter").onchange = render;
+$("m-cancel").onclick = closeModal;
+$("m-save").onclick = saveModal;
+$("m-digital").onchange = e => $("f-dl").hidden = !e.target.checked;
+$("m-delete").onclick = () => {
+  const p = products.find(x => x.id === editing);
+  if (p && confirm(`Remove "${p.name}" from the shop?`)) { p._deleted = true; catalogDirty = true; closeModal(); render(); }
+};
+$("discard").onclick = () => { if (confirm("Throw away all unpublished changes?")) { stagedPhotos={}; stagedFiles={}; catalogDirty=false; load(); } };
+$("publish").onclick = publish;
+$("file").onchange = e => handlePhoto(e.target.files[0]);
+// modal photo drop zone (delegated, since innerHTML is reset)
+$("drop").addEventListener("click", e => {
+  if (e.target.tagName === "INPUT") return; // don't re-trigger when the input's own click bubbles
+  const f = $("drop").querySelector("input") || $("file"); photoTarget = null; f.click();
+});
+$("drop").addEventListener("change", e => { if (e.target.matches("input[type=file]")) handlePhoto(e.target.files[0]); });
+["dragover","dragleave","drop"].forEach(ev => $("drop").addEventListener(ev, e => {
+  e.preventDefault(); $("drop").classList.toggle("over", ev === "dragover");
+  if (ev === "drop") { photoTarget = null; handlePhoto(e.dataTransfer.files[0]); }
+}));
+$("dl-drop").addEventListener("click", () => $("dl-file").click());
+$("dl-file").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  const b64 = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result.split(",")[1]); r.readAsDataURL(f); });
+  modalDl = { name: f.name.toLowerCase().replace(/[^a-z0-9.]+/g, "-"), b64 };
+  $("dl-drop").textContent = "Attached: " + modalDl.name;
+};
+["dragover","dragleave","drop"].forEach(ev => $("dl-drop").addEventListener(ev, e => {
+  e.preventDefault(); $("dl-drop").classList.toggle("over", ev === "dragover");
+  if (ev === "drop") { $("dl-file").files = e.dataTransfer.files; $("dl-file").onchange({target:$("dl-file")}); }
+}));
+
+async function boot() {
+  $("gate").hidden = true; $("main").hidden = false; $("forget").hidden = false;
+  try { await load(); } catch(e) {
+    $("main").hidden = true; $("gate").hidden = false; $("forget").hidden = true;
+    $("gate-err").textContent = "Couldn't load the catalog: " + e.message;
+  }
+}
+if (token) boot();
+</script>
+</body>
+</html>
