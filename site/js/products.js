@@ -3,14 +3,14 @@
    ------------------------------------------------------------
    To add a card: copy a block, give it a unique `id`, set the
    `priceCents` (e.g. 600 = $6.00), category, and emoji/photo.
-   IMPORTANT: every id + priceCents here must also be mirrored in
-   netlify/functions/create-checkout.js (the server validates
-   prices so buyers can't tamper with them). Keep them in sync.
+   This file is the SINGLE source of truth — the checkout and
+   download functions read it too, so prices and files only ever
+   need to be edited here. (Easier still: use /admin.html.)
 
    `type`: "physical" (default) ships in the mail, or "digital"
    for instant-download printables (no shipping; delivered on the
    thank-you page after payment). Digital items also need a
-   `file` here AND in the server's DIGITAL_FILES map.
+   `file` path pointing at the download inside site/.
 
    Swap `emoji` for `image: "img/your-photo.jpg"` when you have
    real product photos — the pages use the photo if present.
@@ -123,3 +123,9 @@ function coverArt(p) {
          `<img class="art-photo" src="${src}" alt="${name}" loading="lazy" onerror="this.remove()">`;
 }
 function isDigital(p){ return p && p.type === "digital"; }
+
+/* Node export so the Netlify functions can read this same catalog.
+   Browsers skip this block (no `module` in the browser). */
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = { CATEGORIES, PRODUCTS };
+}
