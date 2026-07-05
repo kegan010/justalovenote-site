@@ -141,6 +141,9 @@ exports.handler = async (event) => {
 
     const session = {
       mode: "payment",
+      // Lets buyers enter promo codes (e.g. WELCOME10) at checkout.
+      // Create the codes themselves in Stripe Dashboard → Products → Coupons.
+      allow_promotion_codes: true,
       line_items,
       metadata: { digital_ids: digitalIds.join(",") },
       // Stripe Tax calculates sales tax from the buyer's address — but ONLY when

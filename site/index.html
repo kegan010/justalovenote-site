@@ -134,10 +134,30 @@
     <span class="script" style="font-size:1.6rem;color:var(--rose-deep)">stay in touch</span>
     <h2 style="font-size:2rem;margin:4px 0 10px">Join the love letter list</h2>
     <p style="color:var(--ink-soft)">New designs, seasonal cards, and a little 10% welcome treat for your first order.</p>
-    <form onsubmit="this.querySelector('input').value='';alert('Thanks for subscribing! 💌');return false">
-      <input type="email" placeholder="your@email.com" aria-label="email" required>
+    <form id="news-form" name="newsletter" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="newsletter">
+      <p hidden><label>Don't fill this out: <input name="bot-field"></label></p>
+      <input type="email" name="email" placeholder="your@email.com" aria-label="email" required>
       <button class="btn btn-primary" type="submit">Subscribe</button>
     </form>
+    <p id="news-thanks" hidden style="margin-top:14px;font-weight:700">You're on the list! 💌 Enjoy <b>10% off</b> your first order with code <b>WELCOME10</b> at checkout.</p>
+    <script>
+    document.getElementById('news-form').addEventListener('submit', async function(e){
+      e.preventDefault();
+      const btn = this.querySelector('button'); btn.disabled = true; btn.textContent = 'Sending…';
+      try {
+        const res = await fetch('/', { method:'POST',
+          headers:{ 'Content-Type':'application/x-www-form-urlencoded' },
+          body: new URLSearchParams(new FormData(this)) });
+        if (!res.ok) throw new Error(res.status);
+        this.hidden = true;
+        document.getElementById('news-thanks').hidden = false;
+      } catch(err) {
+        btn.disabled = false; btn.textContent = 'Subscribe';
+        alert('Sorry, something went wrong — please try again.');
+      }
+    });
+    </script>
   </div>
 </section>
 
